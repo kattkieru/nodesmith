@@ -29,6 +29,30 @@ kUnit = 10
 kTyped = 11
 kCompound = 12
 
+types_mapping_table = {
+	'short'    : 'short',
+	'float'    : 'float',
+	'float3'   : 'MFloatVector',
+	'double'   : 'double',
+	'double3'  : 'MVector',
+	'matrix'   : 'MMatrix',
+	'point'    : 'MPoint',
+	'bool'     : 'bool',
+	'unit'     : 'double',
+
+	'angle'    : 'double',
+	'angle3'   : 'MVector',
+
+	'ramp'     : None,
+	'typed'    : None,
+	'compound' : None,
+}
+
+
+## ----------------------------------------------------------------------
+class MPxNodeCPPException(Exception):
+	pass
+
 
 ## ----------------------------------------------------------------------
 class MPxNodeCPP(object):
@@ -70,6 +94,9 @@ class MPxNodeCPP(object):
 			If None, the long name will also be used as the short name.
 		:return: No return value
 		"""
+
+		if not type in types_mapping_table:
+			raise MPxNodeCPPException( "Invalid plug type %s." % type )
 
 		attr_name = 'i' if is_input else 'o'
 		attr_name += plug[0].upper() + plug[1:]
@@ -130,6 +157,20 @@ class MPxNodeCPP(object):
 
 		return (result)
 
+	def generate_private_variables(self):
+		result = ""
+
+		for name, data in self.attributes.items():
+			default, aType, is_input, aMin, aMax, array, keyable, storable, readable, \
+				writable, cached, hidden, short_name, attr_name = self.extract_attribute_data( data )
+
+			if not array:
+				result += '\t{variable_type} {name};\n'.format( 
+					variable_type=types_mapping_table[data['type']], name=name
+				)
+
+		return(result)
+
 	def generate_include(self):
 		"""
 		Generates the C++ header file for the class.
@@ -137,7 +178,7 @@ class MPxNodeCPP(object):
 		"""
 
 		with open( os.sep.join( [os.path.dirname( __file__ ), 'mpxnode_template.h'] ), 'r' ) as fp:
-			template = fp.read( )
+			template = fp.read()
 
 		## I was using .format but then it's harder to edit the templates
 		## because you have to keep track more. So I'm replacing directly.
@@ -148,7 +189,8 @@ class MPxNodeCPP(object):
 		result = template.format(
 			class_name=self.class_name,
 			inputs=self.generate_header_attributes( inputs=True ),
-			outputs=self.generate_header_attributes( inputs=False )
+			outputs=self.generate_header_attributes( inputs=False ),
+			private_variables=self.generate_private_variables()
 		)
 
 		return( result )
@@ -262,13 +304,31 @@ class MPxNodeCPP(object):
 
 		return (result)
 
-	def generate_attribute_creation_affects_inputs(self):
+	def generate_attribute_creation_affects(self, inputs):
 		result = ""
+
+		## shouldn't matter if this is sorted or not
+		for name, data in self.attributes.items():
+			is_input = data.get('is_input', None)
+			if is_input == inputs:
+				result += '\t\t{{ "{name}", & {attr_name} }},\n'.format( name=name, attr_name=data['attr_name'] )
+
+		## eat the last comma
+		result = result.rpartition(",\n")[0]
+
 		return (result)
 
-	def generate_attribute_creation_affects_outputs(self):
+	def generate_ae_parameters(self):
 		result = ""
-		return (result)
+		ae_types = { 'float' }
+
+		for name, data in self.attributes.items():
+			is_input = data.get('is_input', None)
+			if is_input:
+				if data['type'] in ae_types:
+					result += ('\t' * 5) + 'editorTemplate -addControl "{name}";\n'.format( name=name )
+
+		return(result)
 
 	def generate_class_main(self):
 		"""
@@ -283,6 +343,7 @@ class MPxNodeCPP(object):
 			typeID=self.typeID,
 			header_name=self.class_name,
 			class_name=self.class_name,
+			node_name=self.node_name,
 			static_input_attributes=self.generate_cpp_static_attributes( inputs=True ),
 			static_output_attributes=self.generate_cpp_static_attributes( inputs=False ),
 			constants=self.generate_cpp_constants(),
@@ -292,8 +353,9 @@ class MPxNodeCPP(object):
 			attribute_creation="attribute_creation", # self.generate_cpp_attrib_creation(),
 			attribute_creation_inputs=self.generate_cpp_attrib_creation(True),
 			attribute_creation_outputs=self.generate_cpp_attrib_creation(False),
-			attribute_creation_affects_inputs=self.generate_attribute_creation_affects_inputs(),
-			attribute_creation_affects_outputs=self.generate_attribute_creation_affects_outputs()
+			attribute_creation_affects_inputs=self.generate_attribute_creation_affects(True),
+			attribute_creation_affects_outputs=self.generate_attribute_creation_affects(False),
+			attribute_editor_parameters=self.generate_ae_parameters()
 		)
 
 		return(result)

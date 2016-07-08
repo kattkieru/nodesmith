@@ -4,6 +4,8 @@
 
 class {class_name} : public MPxNode
 {{
+private:
+{private_variables}
 public:
 
 	{class_name}();

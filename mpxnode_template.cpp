@@ -86,8 +86,6 @@ MStatus {class_name}::initialize()
 	char msg[1024];
 
 // attribute function classes
-{attribute_creation}
-
 	MFnEnumAttribute     eAttr;
 	MFnUnitAttribute     uAttr;
 	MFnTypedAttribute    tAttr;
@@ -131,41 +129,12 @@ MStatus {class_name}::initialize()
 // ----------------------------------------------------------------------
 void {class_name}::aeTemplate() {{
 	const char *msg = R"(
-		global proc AEsm_spineTemplate(string $nodeName) {{
+		global proc AE{node_name}Template(string $nodeName) {{
 			// AEswatchDisplay $nodeName;
 			editorTemplate -beginScrollLayout;
 
-				editorTemplate -beginLayout "Setup" -collapse 0;
-					editorTemplate -addControl "curveFunction";
-					editorTemplate -addControl "samples";
-					editorTemplate -addControl "alpha";
-					editorTemplate -addControl "inputCount";
-					editorTemplate -addControl "outputCount";
-					editorTemplate -addControl "restLength";
-
-				editorTemplate -endLayout;
-
-				// editorTemplate -beginLayout "Positioning" -collapse 0;
-				// 	editorTemplate -addControl "compress";
-				// 	editorTemplate -addControl "slide";
-				// 	editorTemplate -addControl "stacking";
-				// editorTemplate -endLayout;
-
-				editorTemplate -beginLayout "Squash and Stretch" -collapse 0;
-					editorTemplate -addControl "stretchBlend";
-					editorTemplate -addControl "squetchMax";
-					// editorTemplate -addControl "scaleClamp";
-					// AEaddRampControl($nodeName + ".parametricScale");
-					// AEaddRampControl($nodeName + ".lengthScale");
-				editorTemplate -endLayout;
-
-				// AEaddRampControl($nodeName + ".squetchShape");
-
-				editorTemplate -beginLayout "Outputs" -collapse 0;
-					editorTemplate -addControl "curveLength";
-				editorTemplate -endLayout;
-
-				// editorTemplate -endLayout;
+				editorTemplate -beginLayout "Parameters" -collapse 0;
+{attribute_editor_parameters}				editorTemplate -endLayout;
 
 				// AEdependNodeTemplate $nodeName;
 				editorTemplate -addExtraControls -collapse 1;
