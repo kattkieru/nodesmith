@@ -8,8 +8,9 @@
 
 MTypeId {class_name}::id( {typeID} );
 
-// static attribute memory allocation
+// static attribute memory allocation-- inputs
 {static_input_attributes}
+// outputs
 {static_output_attributes}
 
 const struct {{
@@ -91,16 +92,17 @@ MStatus {class_name}::initialize()
 	MFnUnitAttribute     uAttr;
 	MFnTypedAttribute    tAttr;
 	MFnNumericAttribute  nAttr;
-	MFnMatrixAttribute   mAttr;
 	MRampAttribute       rAttr;
 	MFnCompoundAttribute cAttr;
 
+	MFnMatrixAttribute   mAttr;
+	MFloatMatrix         identity;
+	identity.setToIdentity();
+
 // input plugs
 {attribute_creation_inputs}
-
 // output plugs
 {attribute_creation_outputs}
-
 	// attributeAffects maps
 	std::map<std::string, MObject *> all_inputs = {{
 {attribute_creation_affects_inputs}

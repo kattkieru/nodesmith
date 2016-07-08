@@ -13,7 +13,7 @@ public:
 	static  MStatus initialize();
 	static  void aeTemplate();
 
-	static	MTypeId id;
+	static  MTypeId id;
 
 	virtual MStatus setDependentsDirty( const MPlug &plugBeingDirtied,
 		MPlugArray &affectedPlugs );
@@ -26,7 +26,6 @@ public:
 
 	// inputs
 {inputs}
-
 	// outputs
 {outputs}
 }};
