@@ -48,6 +48,43 @@ types_mapping_table = {
 	'compound' : None,
 }
 
+grab_mapping_table = {
+	'short'    : 'asShort',
+	'float'    : 'asFloat',
+	'float3'   : 'asMFloatVector',
+	'double'   : 'asDouble',
+	'double3'  : 'asMVector',
+	'matrix'   : 'asMMatrix',
+	'point'    : 'asMVector',
+	'bool'     : 'asShort',
+	'unit'     : 'asDouble',
+
+	'angle'    : 'asDouble',
+	'angle3'   : 'asMVector',
+
+	'ramp'     : None,
+	'typed'    : None,
+	'compound' : None,
+}
+
+set_mapping_table = {
+	'short'    : 'setShort',
+	'float'    : 'setFloat',
+	'float3'   : 'setMFloatVector',
+	'double'   : 'setDouble',
+	'double3'  : 'setMVector',
+	'matrix'   : 'setMMatrix',
+	'point'    : 'setMVector',
+	'bool'     : 'setShort',
+	'unit'     : 'setDouble',
+
+	'angle'    : 'setDouble',
+	'angle3'   : 'setMVector',
+
+	'ramp'     : None,
+	'typed'    : None,
+	'compound' : None,
+}
 
 ## ----------------------------------------------------------------------
 class MPxNodeCPPException(Exception):
@@ -65,8 +102,24 @@ class MPxNodeCPP(object):
 		"""
 		self.class_name = class_name
 		self.node_name = node_name
-		self.typeID = '0x%6x' % typeID    ## converts to hex
+		if not isinstance(typeID, (str, unicode)):
+			self.typeID = '0x%6x' % typeID    ## converts to hex
+		else:
+			self.typeID = typeID
 		self.attributes = {}
+
+	@property
+	def sorted_attributes(self):
+		"""
+		Sometimes it's useful to have the attribute names
+		in sorted order, so this sorts and re-pairs for
+		quick looping.
+
+		:return: zip() of alpabetically-sorted name:data pairs
+		"""
+		names = sorted( self.attributes.keys() )
+		all_data = [ self.attributes[x] for x in names ]
+		return( zip(names, all_data) )
 
 	def add_plug( self, plug, default, is_input, type='float', min=None, max=None, 
 					array=False, keyable=True, storable=True, readable=True, 
@@ -180,12 +233,6 @@ class MPxNodeCPP(object):
 		with open( os.sep.join( [os.path.dirname( __file__ ), 'mpxnode_template.h'] ), 'r' ) as fp:
 			template = fp.read()
 
-		## I was using .format but then it's harder to edit the templates
-		## because you have to keep track more. So I'm replacing directly.
-		# result = template.replace( '{class_name}', self.class_name )
-		# result = result.replace( '{inputs}', self.generate_header_attributes( inputs=True ) )
-		# result = result.replace( '{outputs}', self.generate_header_attributes( inputs=False ) )
-
 		result = template.format(
 			class_name=self.class_name,
 			inputs=self.generate_header_attributes( inputs=True ),
@@ -201,7 +248,7 @@ class MPxNodeCPP(object):
 		for name, data in self.attributes.items():
 			if data['is_input'] is inputs:
 				if result is None:
-					result = "\t   "
+					result = "\t\t   "
 				else:
 					result += "\t\t|| "
 				result += "plug == {attr_name} || plug.parent() == {attr_name}\n".format( attr_name=data['attr_name'] )
@@ -227,12 +274,64 @@ class MPxNodeCPP(object):
 		return( default, aType, is_input, aMin, aMax, array, keyable, storable,
 				readable, writable, cached, hidden, short_name, attr_name )
 
-	def generate_cpp_input_collection(self):
+	def generate_cpp_collect_inputs(self):
 		result = ""
+
+		for name, data in self.sorted_attributes:
+
+			default, aType, is_input, aMin, aMax, array, keyable, storable, \
+				readable, writable, cached, hidden, short_name, attr_name = self.extract_attribute_data( data )
+
+			if is_input is True:
+				if not array:
+					result += "\t\t{name} = data.inputValue({attr_name}).{grab_type}();\n".format(
+						name=name,
+						attr_name=attr_name,
+						grab_type = grab_mapping_table[aType]
+					)
+				else:
+					raise NotImplementedError( "array plugs not implemented for value collection yet." )
+
 		return (result)
 
-	def generate_cpp_output_setting(self):
+	def generate_cpp_set_outputs(self):
 		result = ""
+
+		for name, data in self.sorted_attributes:
+
+			default, aType, is_input, aMin, aMax, array, keyable, storable, \
+				readable, writable, cached, hidden, short_name, attr_name = self.extract_attribute_data( data )
+
+			if is_input is not True:
+				if not array:
+					code  = "\t\tMDataHandle h_{name} = data.outputValue({attr_name})\n"
+					code += "\t\th_{name}.{set_type}({name});\n\n"
+					code  = code.format(
+						name=name,
+						attr_name=attr_name,
+						set_type = set_mapping_table[aType]
+					)
+
+					result += code
+				else:
+					raise NotImplementedError( "array plugs not implemented for setting yet." )
+
+		return (result)
+
+	def generate_set_all_clean(self):
+		result = ""
+
+		for name, data in self.sorted_attributes:
+
+			default, aType, is_input, aMin, aMax, array, keyable, storable, \
+				readable, writable, cached, hidden, short_name, attr_name = self.extract_attribute_data( data )
+
+			if is_input is not True:
+				if not array:
+					result += "\tdata.outputValue({attr_name}).setClean();\n".format( attr_name=attr_name )
+				else:
+					raise NotImplementedError( "array plugs not implemented for all clean." )
+
 		return (result)
 
 	def generate_cpp_attrib_creation(self, is_input):
@@ -330,7 +429,7 @@ class MPxNodeCPP(object):
 
 		return(result)
 
-	def generate_class_main(self):
+	def generate_class(self):
 		"""
 		Generates the C++ file for the class with method implementations.
 		:return: The string for the C++ class file all constructed.
@@ -348,14 +447,33 @@ class MPxNodeCPP(object):
 			static_output_attributes=self.generate_cpp_static_attributes( inputs=False ),
 			constants=self.generate_cpp_constants(),
 			plug_check=self.generate_cpp_plug_check(),
-			input_collection=self.generate_cpp_input_collection(),
-			output_setting=self.generate_cpp_output_setting(),
+			input_collection=self.generate_cpp_collect_inputs(),
+			output_setting=self.generate_cpp_set_outputs(),
 			attribute_creation="attribute_creation", # self.generate_cpp_attrib_creation(),
 			attribute_creation_inputs=self.generate_cpp_attrib_creation(True),
 			attribute_creation_outputs=self.generate_cpp_attrib_creation(False),
 			attribute_creation_affects_inputs=self.generate_attribute_creation_affects(True),
 			attribute_creation_affects_outputs=self.generate_attribute_creation_affects(False),
-			attribute_editor_parameters=self.generate_ae_parameters()
+			attribute_editor_parameters=self.generate_ae_parameters(),
+			set_all_clean=self.generate_set_all_clean()
+		)
+
+		return(result)
+
+	def generate_node_main(self):
+		"""
+		Generates the C++ file for the actual compute function. This is left
+		separate because the class can be regenerated.
+		:return: The string for the C++ class file all constructed.
+		"""
+
+		with open( os.sep.join( [os.path.dirname( __file__ ), 'mpxnode_template_main.cpp'] ), 'r' ) as fp:
+			template = fp.read( )
+
+		result = template.format(
+			header_name=self.class_name,
+			class_name=self.class_name,
+			node_name=self.node_name
 		)
 
 		return(result)

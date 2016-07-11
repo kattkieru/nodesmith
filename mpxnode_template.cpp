@@ -13,7 +13,7 @@ MTypeId {class_name}::id( {typeID} );
 // outputs
 {static_output_attributes}
 
-const struct {{
+constexpr struct {{
 	MMatrix identity {{}};
 {constants}
 }} SS {{}}; // need to force the initializer in gcc
@@ -46,24 +46,27 @@ MStatus {class_name}::setDependentsDirty( const MPlug &plugBeingDirtied, MPlugAr
 }}
 
 // ----------------------------------------------------------------------
+MStatus {class_name}::set_all_clean()
+{{
+{set_all_clean}}}
+
+// ----------------------------------------------------------------------
 MStatus {class_name}::compute( const MPlug& plug, MDataBlock& data )
 {{
 	MStatus stat;
 	MObject node = thisMObject();
 
 	bool plug_check {{
-{plug_check}    }};
+{plug_check}	}};
 
 	if( plug_check ) {{
 		// collect all inputs
 {input_collection}
-
 		// call external compute function
-		{class_name}__main();
+		node_main();
 
 		// set all outputs
 {output_setting}
-
 		set_all_clean();
 		return MS::kSuccess;
 	}}

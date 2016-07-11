@@ -26,6 +26,9 @@ public:
 
 	void set_all_clean(void);
 
+	// this is the real compute function
+	inline void node_main(void);
+
 	// inputs
 {inputs}
 	// outputs
