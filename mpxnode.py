@@ -127,8 +127,8 @@ class MPxNodeCPP(object):
 		return( zip(names, all_data) )
 
 	def add_plug( self, plug, default, is_input, type='float', min=None, max=None, 
-					array=False, keyable=True, storable=True, readable=True, 
-					writable=True, cached=False, hidden=False, short_name=None ):
+					array=None, keyable=None, storable=None, readable=None, 
+					writable=None, cached=None, hidden=None, short_name=None ):
 		"""
 		Adds a definition for a node plug.
 		:param plug: The name of the plug.
@@ -179,16 +179,16 @@ class MPxNodeCPP(object):
 		self.attributes[plug] = attribute_data
 
 	def add_input_plug(self, plug, default, type='float', min=None, max=None, array=False,
-					keyable=True, storable=True, cached=False,
-					hidden=False, short_name=None ):
+					keyable=None, storable=None, cached=None,
+					hidden=None, short_name=None ):
 
 		return( self.add_plug(plug, default, True, type=type, min=min, max=max, array=array,
 				keyable=keyable, storable=storable, readable=False, writable=True, 
 				cached=cached, hidden=hidden, short_name=short_name ) )
 
 	def add_output_plug( self, plug, default, type='float', min=None, max=None, array=False,
-						keyable=True, storable=True, cached=False,
-						hidden=False, short_name=None ):
+						keyable=None, storable=None, cached=None,
+						hidden=None, short_name=None ):
 
 		return (self.add_plug( plug, default, False, type=type, min=min, max=max, array=array,
 			   storable=storable, readable=True, writable=False, cached=cached,
@@ -267,11 +267,11 @@ class MPxNodeCPP(object):
 		aMin       = data.get('min', None)
 		aMax       = data.get('max', None)
 		array      = data.get('array', None)
-		keyable    = data.get('keyable', None)
-		storable   = data.get('storable', None)
-		readable   = data.get('readable', None)
-		writable   = data.get('writable', None)
-		cached     = data.get('cached', None)
+		keyable    = data.get('keyable', True if is_input else False)
+		storable   = data.get('storable', True if is_input else False)
+		readable   = data.get('readable', False if is_input else True)
+		writable   = data.get('writable', True if is_input else False)
+		cached     = data.get('cached', True if is_input else False)
 		hidden     = data.get('hidden', None)
 		short_name = data.get('short_name', None)
 		attr_name  = data.get('attr_name', None)
@@ -379,6 +379,10 @@ class MPxNodeCPP(object):
 					create += '\t\t{mfn}.setDefault( identity );\n'.format(mfn=mfn)
 
 					result += create
+
+				else:
+					raise NotImplementedError( "Plugs of %s type are not yet implemented." % aType )
+
 				
 
 				result += '\t\t{mfn}.setStorable({value});\n'.format( mfn=mfn, value='true' if storable else 'false' )

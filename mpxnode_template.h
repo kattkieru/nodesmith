@@ -28,7 +28,7 @@ public:
 	inline void set_all_clean(MDataBlock& data);
 
 	// this is the real compute function
-	inline void node_main(void);
+	void node_main(void);
 
 	// inputs
 {inputs}

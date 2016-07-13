@@ -11,12 +11,12 @@ set_target_properties( {project_name} PROPERTIES PREFIX "" )
 add_definitions( -D_BOOL -DREQUIRE_IOSTREAM -DMAYA_PARALLEL -D_LANGUAGE_C_PLUS_PLUS )
 
 if (MSVC)
-	set( MAYA_INCLUDE_LOCATION {win_include_path} )
-	set( MAYA_LIB_LOCATION {win_lib_path} )
+	set( MAYA_INCLUDE_LOCATION "{win_include_path}" )
+	set( MAYA_LIB_LOCATION "{win_lib_path}" )
 
-	target_compile_options(
+	set_property(TARGET {project_name} APPEND PROPERTY CXX_FLAGS
 		{project_name} PUBLIC
-		"/EHsc /MT /Zi /Oi /fp:fast /Ob1 /O2"
+		"/MT" "/Zi" "/Oi" "/fp:fast" "/Ob1" "/O2" "/EHsc"
 	)
 
 	add_definitions( /DNT_PLUGIN /D_CRT_SECURE_NO_WARNINGS )

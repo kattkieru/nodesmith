@@ -32,16 +32,17 @@ class Plugin( object ):
 				mac_lib_path=None, mac_include_path=None,
 				lin_lib_path=None, lin_include_path=None,
 				constants=None ):
-		self.name             = name
-		self.author           = author
-		self.version          = version
-		self.win_lib_path     = win_lib_path or 'C:/Program Files/Autodesk/maya2016/lib'
-		self.win_include_path = win_include_path or 'C:/Program Files/Autodesk/maya2016/include'
-		self.mac_lib_path     = mac_lib_path or '/Applications/Autodesk/maya2016/Maya.app/Contents/MacOS'
-		self.mac_include_path = mac_include_path or '/Applications/Autodesk/maya2016/include'
-		self.lin_lib_path     = lin_lib_path or 'UNSUPPORTED'
-		self.lin_include_path = lin_include_path or  'UNSUPPORTED'
-		self.constants        = constants
+		self.name                = name
+		self.author              = author
+		self.version             = version
+		self.win_lib_path        = win_lib_path or 'C:/Program Files/Autodesk/maya2016/lib'
+		self.win_include_path    = win_include_path or 'C:/Program Files/Autodesk/maya2016/include'
+		self.mac_lib_path        = mac_lib_path or '/Applications/Autodesk/maya2016/Maya.app/Contents/MacOS'
+		self.mac_include_path    = mac_include_path or '/Applications/Autodesk/maya2016/include'
+		self.lin_lib_path        = lin_lib_path or 'UNSUPPORTED'
+		self.lin_include_path    = lin_include_path or  'UNSUPPORTED'
+		self.constants           = constants
+		self.install_destination = None
 
 		self.nodes = OrderedDict()
 
@@ -63,7 +64,8 @@ class Plugin( object ):
 			self.__setattr__( attr, data[attr] )
 
 		for attr in  ['win_lib_path', 'win_include_path', 'mac_lib_path', 
-			'mac_include_path', 'lin_lib_path', 'lin_include_path']:
+			'mac_include_path', 'lin_lib_path', 'lin_include_path',
+			'install_destination']:
 			if attr in data:
 				self.__setattr__( attr, data[attr] )
 
@@ -100,6 +102,7 @@ class Plugin( object ):
 				node = self.add_node( name, node_name, typeID, node_data )
 
 	def to_json( self ):
+		##!FIXME: This
 		result = {
 			"name":              self.name,
 			"author":            self.author,
@@ -227,17 +230,27 @@ class Plugin( object ):
 		with open( os.sep.join( [os.path.dirname( __file__ ), 'CMakeLists_template.txt'] ), 'r' ) as fp:
 			template = fp.read( )
 
-		result = template.format(
-			project_name=self.name,
-			source_files=' '.join( ['plugin_main.cpp'] + \
+		if not template[-1] == '\n':
+			template += '\n'
+
+		data = {
+			'project_name':self.name,
+			'source_files':' '.join( ['plugin_main.cpp'] + \
 					[x+'.cpp' for x in self.nodes.keys()]+ \
 					[x+'_main.cpp' for x in self.nodes.keys()]),
-			win_include_path=self.win_include_path,
-			win_lib_path=self.win_lib_path,
-			mac_include_path=self.mac_include_path,
-			mac_lib_path=self.mac_lib_path,
-			# lin_include_path=self.lin_include_path,
-			# lin_lib_path=self.lin_lib_path,
-		)
+			'win_include_path':self.win_include_path,
+			'win_lib_path':self.win_lib_path,
+			'mac_include_path':self.mac_include_path,
+			'mac_lib_path':self.mac_lib_path,
+			# 'lin_include_path'=self.lin_include_path,
+			# 'lin_lib_path'=self.lin_lib_path,
+		}
+
+		if self.install_destination:
+			cmake_install_destination = self.install_destination
+			template += "install( TARGETS {project_name} DESTINATION {install_destination} )\n"
+			data.update( {'install_destination':cmake_install_destination} )
+
+		result = template.format( **data )
 
 		return (result)
