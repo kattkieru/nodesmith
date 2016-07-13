@@ -12,6 +12,8 @@
 	"lin_lib_path": "/aw/maya2016/lib",
 	"lin_include_path": "/aw/maya2016/include",
 
+	"install_destination": "C:/Users/cwardlaw/Desktop/blackmagick/plug-ins",
+
 	"constants": {
 		"MIN_OUTPUTS": 5,
 		"FUN_STRING_NAME": "\"BUNNIES\""
