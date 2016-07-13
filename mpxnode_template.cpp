@@ -46,7 +46,7 @@ MStatus {class_name}::setDependentsDirty( const MPlug &plugBeingDirtied, MPlugAr
 }}
 
 // ----------------------------------------------------------------------
-MStatus {class_name}::set_all_clean()
+inline void {class_name}::set_all_clean()
 {{
 {set_all_clean}}}
 

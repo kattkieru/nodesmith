@@ -24,7 +24,7 @@ public:
 
 	virtual SchedulingType schedulingType() const {{ return kParallel }};
 
-	void set_all_clean(void);
+	inline void set_all_clean(void);
 
 	// this is the real compute function
 	inline void node_main(void);
