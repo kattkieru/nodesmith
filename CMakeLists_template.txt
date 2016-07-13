@@ -1,0 +1,95 @@
+cmake_minimum_required( VERSION 3.3 )
+project( {project_name} )
+
+set( CMAKE_LIBRARY_OUTPUT_DIRECTORY "${{CMAKE_CURRENT_SOURCE_DIR}}" )
+
+set( SOURCE_FILES {source_files} )
+
+add_library( {project_name} SHARED ${{SOURCE_FILES}} )
+set_target_properties( {project_name} PROPERTIES PREFIX "" )
+
+add_definitions( -D_BOOL -DREQUIRE_IOSTREAM -DMAYA_PARALLEL -D_LANGUAGE_C_PLUS_PLUS )
+
+if (MSVC)
+	set( MAYA_INCLUDE_LOCATION {win_include_path} )
+	set( MAYA_LIB_LOCATION {win_lib_path} )
+
+	target_compile_options(
+		{project_name} PUBLIC
+		"/EHsc /MT /Zi /Oi /fp:fast /Ob1 /O2"
+	)
+
+	add_definitions( /DNT_PLUGIN /D_CRT_SECURE_NO_WARNINGS )
+
+	set_target_properties( {project_name} PROPERTIES SUFFIX ".mll" )
+
+	target_link_libraries(
+		{project_name}
+		OpenMaya.lib
+		OpenMayaAnim.lib
+		Foundation.lib
+		Image.lib
+		kernel32.lib
+		user32.lib
+		gdi32.lib
+		winspool.lib
+		comdlg32.lib
+		advapi32.lib
+		shell32.lib
+		ole32.lib
+		oleaut32.lib
+		uuid.lib
+		odbc32.lib
+		odbccp32.lib
+	)
+
+	set_property(TARGET {project_name} APPEND PROPERTY LINK_FLAGS
+		"/export:initializePlugin /export:uninitializePlugin /INCREMENTAL:NO /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /DYNAMICBASE:NO /MACHINE:X64 /debug:full"
+	)
+
+elseif( APPLE )
+	set( MAYA_INCLUDE_LOCATION "{mac_include_path}" )
+	set( MAYA_LIB_LOCATION "{mac_lib_path}" )
+	set( CMAKE_C_COMPILER "clang" )
+	set( CMAKE_CXX_COMPILER "clang++" )
+
+	target_compile_options(
+		{project_name} PUBLIC
+		-m64 -fPIC -O2 -g -fno-inline -avx
+		-std=c++14 -mmacosx-version-min=10.8
+		-fno-gnu-keywords -fpascal-strings
+		-Wc++11-extensions -Wc++11-long-long
+		-stdlib=libc++
+	)
+
+	add_definitions( -DMAC_PLUGIN -DOSMac_ -DCC_GNU_ -DOSMacOSX_ -DOSMac_MachO_ )
+
+	set_target_properties( {project_name} PROPERTIES SUFFIX ".bundle" )
+
+	target_link_libraries(
+		{project_name}
+		libOpenMaya.dylib
+		libOpenMayaAnim.dylib
+		libFoundation.dylib
+	)
+
+	set_property(TARGET {project_name} APPEND PROPERTY LINK_FLAGS
+		-headerpad_max_install_names
+		-framework System
+		-framework SystemConfiguration
+		-framework CoreServices
+		-framework Cocoa
+		-framework ApplicationServices
+		-framework IOKit
+		-Wl,-exported_symbol,__Z16initializePlugin7MObject
+		-Wl,-exported_symbol,__Z18uninitializePlugin7MObject
+	)
+
+else()
+	message( FATAL_ERROR "Sorry, current platform is unsupported." )
+
+endif()
+
+include_directories( ${{MAYA_INCLUDE_LOCATION}} )
+link_directories( ${{MAYA_LIB_LOCATION}} )
+
