@@ -16,6 +16,11 @@ import os, string, sys
 
 ## ----------------------------------------------------------------------
 
+try:
+	StringTypes = ( str, unicode )
+except:
+	StringTypes = str
+
 kShort = 1
 kFloat = 2
 kFloat3 = 3
@@ -102,7 +107,7 @@ class MPxNodeCPP(object):
 		"""
 		self.class_name = class_name
 		self.node_name = node_name
-		if not isinstance(typeID, (str, unicode)):
+		if not isinstance(typeID, StringTypes):
 			self.typeID = '0x%6x' % typeID    ## converts to hex
 		else:
 			self.typeID = typeID
