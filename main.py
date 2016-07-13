@@ -108,9 +108,9 @@ for _, node in plugin.nodes.items():
 		fp.write( node.generate_node_main() )
 		all_cpp_files.append( main_name )
 
-with open(os.sep.join([args.folder, 'CMakeList.txt']), 'w') as fp:
+with open(os.sep.join([args.folder, 'CMakeLists.txt']), 'w') as fp:
 	print( "\t+ Writing CMake project ..." )
-	fp.write( plugin.generate_common_header() )
+	fp.write( plugin.generate_plugin_cmake() )
 
 print( "++ Project generation complete." )
 

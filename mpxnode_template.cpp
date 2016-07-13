@@ -13,7 +13,7 @@ MTypeId {class_name}::id( {typeID} );
 // outputs
 {static_output_attributes}
 
-constexpr struct {{
+const struct {{
 	MMatrix identity {{}};
 {constants}
 }} SS {{}}; // need to force the initializer in gcc
@@ -43,10 +43,12 @@ MStatus {class_name}::setDependentsDirty( const MPlug &plugBeingDirtied, MPlugAr
 
 	return(MStatus::kSuccess);
 	*/
+
+	return MStatus::kSuccess;
 }}
 
 // ----------------------------------------------------------------------
-inline void {class_name}::set_all_clean()
+inline void {class_name}::set_all_clean(MDataBlock& data)
 {{
 {set_all_clean}}}
 
@@ -67,7 +69,7 @@ MStatus {class_name}::compute( const MPlug& plug, MDataBlock& data )
 
 		// set all outputs
 {output_setting}
-		set_all_clean();
+		set_all_clean(data);
 		return MS::kSuccess;
 	}}
 

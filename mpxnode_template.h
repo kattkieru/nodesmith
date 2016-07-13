@@ -1,4 +1,5 @@
-#pragma once
+#ifndef __{class_name}_H
+#define __{class_name}_H
 
 // ----------------------------------------------------------------------
 
@@ -22,9 +23,9 @@ public:
 
 	virtual MStatus compute( const MPlug& plug, MDataBlock& data );
 
-	virtual SchedulingType schedulingType() const {{ return kParallel }};
+	virtual SchedulingType schedulingType() const {{ return kParallel; }};
 
-	inline void set_all_clean(void);
+	inline void set_all_clean(MDataBlock& data);
 
 	// this is the real compute function
 	inline void node_main(void);
@@ -35,3 +36,4 @@ public:
 {outputs}
 }};
 
+#endif

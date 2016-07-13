@@ -309,7 +309,7 @@ class MPxNodeCPP(object):
 
 			if is_input is not True:
 				if not array:
-					code  = "\t\tMDataHandle h_{name} = data.outputValue({attr_name})\n"
+					code  = "\t\tMDataHandle h_{name} = data.outputValue({attr_name});\n"
 					code += "\t\th_{name}.{set_type}({name});\n\n"
 					code  = code.format(
 						name=name,
