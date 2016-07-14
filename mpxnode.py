@@ -309,14 +309,17 @@ class MPxNodeCPP(object):
 
 			if is_input is not True:
 				if not array:
-					code  = "\t\tMDataHandle h_{name} = data.outputValue({attr_name});\n"
-					code += "\t\th_{name}.{set_type}({name});\n\n"
+					code = "\t\tMDataHandle h_{name} = data.outputValue({attr_name});\n"
+					if aType == 'angle':
+						code += "\t\th_{name}.{set_type}(RAD2DEG({name}));\n\n"
+					else:
+						code += "\t\th_{name}.{set_type}({name});\n\n"
+
 					code  = code.format(
 						name=name,
 						attr_name=attr_name,
-						set_type = set_mapping_table[aType]
+						set_type=set_mapping_table[aType]
 					)
-
 					result += code
 				else:
 					raise NotImplementedError( "array plugs not implemented for setting yet." )
@@ -366,6 +369,19 @@ class MPxNodeCPP(object):
 
 					result += create
 
+				elif aType == "angle":
+					mfn = 'uAttr'
+					create = '\t{attr_name} = {mfn}.create( "{name}", "{short_name}", MFnUnitAttribute::kAngle, {default} );\n'
+					create = create.format(
+						attr_name=attr_name,
+						mfn=mfn,
+						name=name,
+						short_name=short_name if short_name else name,
+						default=default
+					)
+
+					result += create
+
 				elif aType == 'matrix':
 					mfn = 'mAttr'
 					create = '\t{attr_name} = {mfn}.create( "{name}", "{short_name}" );\n'
@@ -382,8 +398,6 @@ class MPxNodeCPP(object):
 
 				else:
 					raise NotImplementedError( "Plugs of %s type are not yet implemented." % aType )
-
-				
 
 				result += '\t\t{mfn}.setStorable({value});\n'.format( mfn=mfn, value='true' if storable else 'false' )
 				result += '\t\t{mfn}.setKeyable({value});\n'.format(  mfn=mfn, value='true' if keyable else 'false' )
@@ -428,9 +442,9 @@ class MPxNodeCPP(object):
 
 	def generate_ae_parameters(self):
 		result = ""
-		ae_types = { 'float' }
+		ae_types = { 'float', 'angle' }
 
-		for name, data in self.attributes.items():
+		for name, data in self.sorted_attributes:
 			is_input = data.get('is_input', None)
 			if is_input:
 				if data['type'] in ae_types:

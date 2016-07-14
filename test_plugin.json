@@ -36,6 +36,26 @@
 					"default": 0.0
 				}
 			}
+		},
+		"MultiplyTwoAngular": {
+			"node_name": "gr_multTwoA",
+			"id": "0x123457",
+			"inputs": {
+				"input1": {
+					"default": 0.0,
+					"type":"angle"
+				},
+				"input2": {
+					"default": 0.0,
+					"type":"angle"
+				}
+			},
+			"outputs": {
+				"outValue": {
+					"default": 0.0,
+					"type":"angle"
+				}
+			}
 		}
 	}
 }
