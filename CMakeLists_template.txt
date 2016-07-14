@@ -25,10 +25,10 @@ if (MSVC)
 
 	target_link_libraries(
 		{project_name}
-		OpenMaya.lib
-		OpenMayaAnim.lib
-		Foundation.lib
-		Image.lib
+		${{MAYA_LIB_LOCATION}}/OpenMaya.lib
+		${{MAYA_LIB_LOCATION}}/OpenMayaAnim.lib
+		${{MAYA_LIB_LOCATION}}/Foundation.lib
+		${{MAYA_LIB_LOCATION}}/Image.lib
 		kernel32.lib
 		user32.lib
 		gdi32.lib
@@ -68,9 +68,9 @@ elseif( APPLE )
 
 	target_link_libraries(
 		{project_name}
-		libOpenMaya.dylib
-		libOpenMayaAnim.dylib
-		libFoundation.dylib
+		${{MAYA_LIB_LOCATION}}/libOpenMaya.dylib
+		${{MAYA_LIB_LOCATION}}/libOpenMayaAnim.dylib
+		${{MAYA_LIB_LOCATION}}/libFoundation.dylib
 	)
 
 	set_property(TARGET {project_name} APPEND PROPERTY LINK_FLAGS

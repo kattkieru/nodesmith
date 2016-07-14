@@ -179,7 +179,7 @@ class MPxNodeCPP(object):
 		self.attributes[plug] = attribute_data
 
 	def add_input_plug(self, plug, default, type='float', min=None, max=None, array=False,
-					keyable=None, storable=None, cached=None,
+					keyable=True, storable=None, cached=None,
 					hidden=None, short_name=None ):
 
 		return( self.add_plug(plug, default, True, type=type, min=min, max=max, array=array,
@@ -187,7 +187,7 @@ class MPxNodeCPP(object):
 				cached=cached, hidden=hidden, short_name=short_name ) )
 
 	def add_output_plug( self, plug, default, type='float', min=None, max=None, array=False,
-						keyable=None, storable=None, cached=None,
+						keyable=False, storable=None, cached=None,
 						hidden=None, short_name=None ):
 
 		return (self.add_plug( plug, default, False, type=type, min=min, max=max, array=array,
