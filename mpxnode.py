@@ -442,7 +442,7 @@ class MPxNodeCPP(object):
 
 	def generate_ae_parameters(self):
 		result = ""
-		ae_types = { 'float', 'angle' }
+		ae_types = { 'float', 'angle', 'short', 'double' }
 
 		for name, data in self.sorted_attributes:
 			is_input = data.get('is_input', None)
