@@ -16,6 +16,11 @@ import os, string, sys
 
 ## ----------------------------------------------------------------------
 
+try:
+	StringTypes = ( str, unicode )
+except:
+	StringTypes = str
+
 kShort = 1
 kFloat = 2
 kFloat3 = 3
@@ -102,7 +107,7 @@ class MPxNodeCPP(object):
 		"""
 		self.class_name = class_name
 		self.node_name = node_name
-		if not isinstance(typeID, (str, unicode)):
+		if not isinstance(typeID, StringTypes):
 			self.typeID = '0x%6x' % typeID    ## converts to hex
 		else:
 			self.typeID = typeID
@@ -122,8 +127,8 @@ class MPxNodeCPP(object):
 		return( zip(names, all_data) )
 
 	def add_plug( self, plug, default, is_input, type='float', min=None, max=None, 
-					array=False, keyable=True, storable=True, readable=True, 
-					writable=True, cached=False, hidden=False, short_name=None ):
+					array=None, keyable=None, storable=None, readable=None, 
+					writable=None, cached=None, hidden=None, short_name=None ):
 		"""
 		Adds a definition for a node plug.
 		:param plug: The name of the plug.
@@ -174,16 +179,16 @@ class MPxNodeCPP(object):
 		self.attributes[plug] = attribute_data
 
 	def add_input_plug(self, plug, default, type='float', min=None, max=None, array=False,
-					keyable=True, storable=True, cached=False,
-					hidden=False, short_name=None ):
+					keyable=True, storable=None, cached=None,
+					hidden=None, short_name=None ):
 
 		return( self.add_plug(plug, default, True, type=type, min=min, max=max, array=array,
 				keyable=keyable, storable=storable, readable=False, writable=True, 
 				cached=cached, hidden=hidden, short_name=short_name ) )
 
 	def add_output_plug( self, plug, default, type='float', min=None, max=None, array=False,
-						keyable=True, storable=True, cached=False,
-						hidden=False, short_name=None ):
+						keyable=False, storable=None, cached=None,
+						hidden=None, short_name=None ):
 
 		return (self.add_plug( plug, default, False, type=type, min=min, max=max, array=array,
 			   storable=storable, readable=True, writable=False, cached=cached,
@@ -262,11 +267,11 @@ class MPxNodeCPP(object):
 		aMin       = data.get('min', None)
 		aMax       = data.get('max', None)
 		array      = data.get('array', None)
-		keyable    = data.get('keyable', None)
-		storable   = data.get('storable', None)
-		readable   = data.get('readable', None)
-		writable   = data.get('writable', None)
-		cached     = data.get('cached', None)
+		keyable    = data.get('keyable', True if is_input else False)
+		storable   = data.get('storable', True if is_input else False)
+		readable   = data.get('readable', False if is_input else True)
+		writable   = data.get('writable', True if is_input else False)
+		cached     = data.get('cached', True if is_input else False)
 		hidden     = data.get('hidden', None)
 		short_name = data.get('short_name', None)
 		attr_name  = data.get('attr_name', None)
@@ -304,14 +309,17 @@ class MPxNodeCPP(object):
 
 			if is_input is not True:
 				if not array:
-					code  = "\t\tMDataHandle h_{name} = data.outputValue({attr_name})\n"
-					code += "\t\th_{name}.{set_type}({name});\n\n"
+					code = "\t\tMDataHandle h_{name} = data.outputValue({attr_name});\n"
+					if aType == 'angle':
+						code += "\t\th_{name}.{set_type}(RAD2DEG({name}));\n\n"
+					else:
+						code += "\t\th_{name}.{set_type}({name});\n\n"
+
 					code  = code.format(
 						name=name,
 						attr_name=attr_name,
-						set_type = set_mapping_table[aType]
+						set_type=set_mapping_table[aType]
 					)
-
 					result += code
 				else:
 					raise NotImplementedError( "array plugs not implemented for setting yet." )
@@ -361,6 +369,19 @@ class MPxNodeCPP(object):
 
 					result += create
 
+				elif aType == "angle":
+					mfn = 'uAttr'
+					create = '\t{attr_name} = {mfn}.create( "{name}", "{short_name}", MFnUnitAttribute::kAngle, {default} );\n'
+					create = create.format(
+						attr_name=attr_name,
+						mfn=mfn,
+						name=name,
+						short_name=short_name if short_name else name,
+						default=default
+					)
+
+					result += create
+
 				elif aType == 'matrix':
 					mfn = 'mAttr'
 					create = '\t{attr_name} = {mfn}.create( "{name}", "{short_name}" );\n'
@@ -374,7 +395,9 @@ class MPxNodeCPP(object):
 					create += '\t\t{mfn}.setDefault( identity );\n'.format(mfn=mfn)
 
 					result += create
-				
+
+				else:
+					raise NotImplementedError( "Plugs of %s type are not yet implemented." % aType )
 
 				result += '\t\t{mfn}.setStorable({value});\n'.format( mfn=mfn, value='true' if storable else 'false' )
 				result += '\t\t{mfn}.setKeyable({value});\n'.format(  mfn=mfn, value='true' if keyable else 'false' )
@@ -419,9 +442,9 @@ class MPxNodeCPP(object):
 
 	def generate_ae_parameters(self):
 		result = ""
-		ae_types = { 'float' }
+		ae_types = { 'float', 'angle', 'short', 'double' }
 
-		for name, data in self.attributes.items():
+		for name, data in self.sorted_attributes:
 			is_input = data.get('is_input', None)
 			if is_input:
 				if data['type'] in ae_types:

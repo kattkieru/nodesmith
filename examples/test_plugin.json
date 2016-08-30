@@ -3,8 +3,16 @@
 	"author": "kiki",
 	"version": "R100",
 
-	"maya_lib_path": "C:/aw/maya2016/lib",
-	"maya_include_path": "C:/aw/maya2016/include",
+	"win_lib_path": "C:/Progra~1/Autodesk/Maya2016/lib",
+	"win_include_path": "C:/aw/maya2016/include",
+
+	"mac_lib_path": "/Applications/Autodesk/maya2016/Maya.app/Contents/MacOS",
+	"mac_include_path": "/Applications/Autodesk/maya2016/include",
+
+	"lin_lib_path": "/aw/maya2016/lib",
+	"lin_include_path": "/aw/maya2016/include",
+
+	"install_destination": "C:/Users/cwardlaw/Desktop/blackmagick/plug-ins",
 
 	"constants": {
 		"MIN_OUTPUTS": 5,
@@ -29,66 +37,25 @@
 				}
 			}
 		},
-
 		"MultiplyTwoAngular": {
 			"node_name": "gr_multTwoA",
 			"id": "0x123457",
 			"inputs": {
 				"input1": {
 					"default": 0.0,
-					"type": "angle"
+					"type":"angle"
 				},
 				"input2": {
 					"default": 0.0,
-					"type": "angle"
+					"type":"angle"
 				}
 			},
 			"outputs": {
 				"outValue": {
 					"default": 0.0,
-					"type": "angle"
-				}
-			}
-		},
-
-		"AddTwo": {
-			"node_name": "gr_addTwo",
-			"id": "0x123458",
-			"inputs": {
-				"input1": {
-					"default": 0.0
-				},
-				"input2": {
-					"default": 0.0
-				}
-			},
-			"outputs": {
-				"outValue": {
-					"default": 0.0
-				}
-			}
-		},
-
-		"AddTwoAngular": {
-			"node_name": "gr_addTwoA",
-			"id": "0x123459",
-			"inputs": {
-				"input1": {
-					"default": 0.0,
-					"type": "angle"
-				},
-				"input2": {
-					"default": 0.0,
-					"type": "angle"
-				}
-			},
-			"outputs": {
-				"outValue": {
-					"default": 0.0,
-					"type": "angle"
+					"type":"angle"
 				}
 			}
 		}
-
 	}
 }

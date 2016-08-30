@@ -1,5 +1,6 @@
 
-#pragma once
+#ifndef __COMMON_H
+#define __COMMON_H
 // ----------------------------------------------------------------------
 
 #ifndef _CRT_SECURE_NO_WARNINGS
@@ -72,5 +73,5 @@
 
 {constants}
 
-
+#endif
 
