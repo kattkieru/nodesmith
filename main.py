@@ -68,5 +68,30 @@ plugin.from_json( plugin_data )
 
 print("Plugin: %s" % plugin.name )
 
+print("Writing source files...")
+
+filename = "common.cpp"
+with open(filename, "w") as fp:
+	print("\t+ %s..." % filename)
+	fp.write( plugin.generate_common_header() )
+
+filename = "plugin_main.cpp"
+with open(filename, "w") as fp:
+	print("\t+ %s..." % filename)
+	fp.write( plugin.generate_plugin_cpp() )
+
+for filename, node in plugin.nodes.items():
+	with open("%s.h" % filename, "w") as fp:
+		print("\t+ %s.h..." % filename)
+		fp.write( node.generate_include() )
+	with open("%s.cpp" % filename, "w") as fp:
+		print("\t+ %s.cpp..." % filename)
+		fp.write( node.generate_class() )
+
+print("++ Generation complete.")
+
+
+
+
 
 
