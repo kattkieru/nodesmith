@@ -8,11 +8,31 @@ set( SOURCE_FILES {source_files} )
 add_library( {project_name} SHARED ${{SOURCE_FILES}} )
 set_target_properties( {project_name} PROPERTIES PREFIX "" )
 
-add_definitions( -D_BOOL -DREQUIRE_IOSTREAM -DMAYA_PARALLEL -D_LANGUAGE_C_PLUS_PLUS )
+## override paths here
+if(EXISTS "${{ROOT}}/user_config.cmake")
+   include_file( "${{ROOT}}/user_config.cmake" )
+endif()
+
+## default paths
+if(NOT DEFINED ${{WIN_INCLUDE_PATH}} )
+	set( ${{WIN_INCLUDE_PATH}} "{win_include_path}" )
+endif()
+if(NOT DEFINED ${{WIN_LIB_PATH}} )
+	set( ${{WIN_LIB_PATH}} "{win_lib_path}" )
+endif()
+
+if(NOT DEFINED ${{MAC_INCLUDE_PATH}} )
+	set( ${{MAC_INCLUDE_PATH}} "{mac_include_path}" )
+endif()
+if(NOT DEFINED ${{MAC_LIB_PATH}} )
+	set( ${{MAC_LIB_PATH}} "{mac_lib_path}" )
+endif()
+
+add_definitions( -D_BOOL -DMAYA_PARALLEL -D_LANGUAGE_C_PLUS_PLUS )
 
 if (MSVC)
-	set( MAYA_INCLUDE_LOCATION "{win_include_path}" )
-	set( MAYA_LIB_LOCATION "{win_lib_path}" )
+	set( MAYA_INCLUDE_LOCATION ${{WIN_INCLUDE_PATH}} )
+	set( MAYA_LIB_LOCATION ${{WIN_LIB_PATH}} )
 
 	set_property(TARGET {project_name} APPEND PROPERTY CXX_FLAGS
 		{project_name} PUBLIC
@@ -48,14 +68,14 @@ if (MSVC)
 	)
 
 elseif( APPLE )
-	set( MAYA_INCLUDE_LOCATION "{mac_include_path}" )
-	set( MAYA_LIB_LOCATION "{mac_lib_path}" )
+	set( MAYA_INCLUDE_LOCATION "${{MAC_INCLUDE_PATH}}" )
+	set( MAYA_LIB_LOCATION "${{MAC_LIB_PATH}}" )
 	set( CMAKE_C_COMPILER "clang" )
 	set( CMAKE_CXX_COMPILER "clang++" )
 
 	target_compile_options(
 		{project_name} PUBLIC
-		-m64 -fPIC -O2 -g -fno-inline -avx
+		-m64 -fPIC -O2 -g -fno-inline -mavx
 		-std=c++14 -mmacosx-version-min=10.8
 		-fno-gnu-keywords -fpascal-strings
 		-Wc++11-extensions -Wc++11-long-long
