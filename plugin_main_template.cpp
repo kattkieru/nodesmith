@@ -4,7 +4,7 @@
 #include <maya/MFnPlugin.h>
 
 // ----------------------------------------------------------------------
-MStatus initializePlugin( MObject obj )
+PLUGIN_EXPORT MStatus initializePlugin( MObject obj )
 {{
 	MStatus stat;
 	MFnPlugin plugin( obj, "{author}", "{version}", "Any");
@@ -15,7 +15,7 @@ MStatus initializePlugin( MObject obj )
 
 
 // ----------------------------------------------------------------------
-MStatus uninitializePlugin( MObject obj)
+PLUGIN_EXPORT MStatus uninitializePlugin( MObject obj)
 {{
 	MStatus stat;
 	MFnPlugin plugin(obj);
