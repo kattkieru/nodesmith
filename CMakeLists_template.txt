@@ -14,14 +14,25 @@ if (MSVC)
 	set( MAYA_INCLUDE_LOCATION "{win_include_path}" )
 	set( MAYA_LIB_LOCATION "{win_lib_path}" )
 
-	set_property(TARGET {project_name} APPEND PROPERTY CXX_FLAGS
+	target_compile_options(
 		{project_name} PUBLIC
-		"/MT" "/Zi" "/Oi" "/fp:fast" "/Ob1" "/O2" "/EHsc"
+		/MT
+		/Zi
+		/Oi
+		/fp:fast
+		/Ob1
+		/O2
+		/EHsc
 	)
 
 	add_definitions( /DNT_PLUGIN /D_CRT_SECURE_NO_WARNINGS )
 
 	set_target_properties( {project_name} PROPERTIES SUFFIX ".mll" )
+
+	if( MSVC_VERSION GREATER 1800 )
+		## compatibility fix for VS 2017
+		set( PLATFORM_LINK ${{PLATFORM_LINK}} legacy_stdio_definitions.lib )
+	endif()
 
 	target_link_libraries(
 		{project_name}
@@ -41,10 +52,11 @@ if (MSVC)
 		uuid.lib
 		odbc32.lib
 		odbccp32.lib
+		${{PLATFORM_LINK}}
 	)
 
 	set_property(TARGET {project_name} APPEND PROPERTY LINK_FLAGS
-		"/export:initializePlugin /export:uninitializePlugin /INCREMENTAL:NO /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /DYNAMICBASE:NO /MACHINE:X64 /debug:full"
+		"/INCREMENTAL:NO /SUBSYSTEM:WINDOWS /OPT:REF /OPT:ICF /DYNAMICBASE:NO /MACHINE:X64 /debug:full"
 	)
 
 elseif( APPLE )
@@ -55,7 +67,8 @@ elseif( APPLE )
 
 	target_compile_options(
 		{project_name} PUBLIC
-		-m64 -fPIC -O2 -g -fno-inline -avx
+		-m64 -fPIC -O3 -g -mavx
+		-fvisibility=hidden
 		-std=c++14 -mmacosx-version-min=10.8
 		-fno-gnu-keywords -fpascal-strings
 		-Wc++11-extensions -Wc++11-long-long
@@ -71,18 +84,12 @@ elseif( APPLE )
 		${{MAYA_LIB_LOCATION}}/libOpenMaya.dylib
 		${{MAYA_LIB_LOCATION}}/libOpenMayaAnim.dylib
 		${{MAYA_LIB_LOCATION}}/libFoundation.dylib
-	)
-
-	set_property(TARGET {project_name} APPEND PROPERTY LINK_FLAGS
-		-headerpad_max_install_names
-		-framework System
-		-framework SystemConfiguration
-		-framework CoreServices
-		-framework Cocoa
-		-framework ApplicationServices
-		-framework IOKit
-		-Wl,-exported_symbol,__Z16initializePlugin7MObject
-		-Wl,-exported_symbol,__Z18uninitializePlugin7MObject
+		/System/Library/Frameworks/System.framework
+		/System/Library/Frameworks/SystemConfiguration.framework
+		/System/Library/Frameworks/CoreServices.framework
+		/System/Library/Frameworks/Cocoa.framework
+		/System/Library/Frameworks/ApplicationServices.framework
+		/System/Library/Frameworks/IOKit.framework
 	)
 
 else()
