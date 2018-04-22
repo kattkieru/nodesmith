@@ -86,6 +86,7 @@ class Plugin( object ):
 			for name, node_data in data['nodes'].items( ):
 				node_name = node_data.pop( 'node_name', None )
 				typeID = node_data.pop( 'id', None )
+				expression = node_data.pop( 'expression', '' )
 
 				if node_name is None:
 					raise PluginException( "Node %s: expected 'node_name' but found none." % name )
@@ -99,7 +100,12 @@ class Plugin( object ):
 					else:
 						typeID = eval( typeID )
 
-				node = self.add_node( name, node_name, typeID, node_data )
+				if expression.endswith(';'):
+					expression = expression[:-1]
+				
+				expression = ';\n\t'.join( expression.split(';') ) + ';\n'
+
+				node = self.add_node( name, node_name, typeID, node_data, expression )
 
 	def to_json( self ):
 		##!FIXME: This
@@ -113,9 +119,9 @@ class Plugin( object ):
 			"nodes":             { }
 		}
 
-	def add_node( self, class_name, node_name, typeID, data ):
+	def add_node( self, class_name, node_name, typeID, data, expression ):
 		# print("\t+ Adding node %s..." % class_name)
-		node = MPxNodeCPP( class_name, node_name, typeID )
+		node = MPxNodeCPP( class_name, node_name, typeID, expression )
 
 		inputs = data.pop( 'inputs', None )
 		outputs = data.pop( 'outputs', { } )

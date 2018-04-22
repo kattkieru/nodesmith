@@ -99,11 +99,13 @@ class MPxNodeCPPException(Exception):
 ## ----------------------------------------------------------------------
 class MPxNodeCPP(object):
 
-	def __init__( self, class_name, node_name, typeID ):
+	def __init__( self, class_name, node_name, typeID, expression="" ):
 		"""
 		Standard initializer.
 		:param class_name: Name of subclass.
 		:param typeID: MTypeID value. Should be from a registered node block.
+		:param expression: string. For simple nodes, you can drop in the 
+				code here.
 		"""
 		self.class_name = class_name
 		self.node_name = node_name
@@ -112,6 +114,7 @@ class MPxNodeCPP(object):
 		else:
 			self.typeID = typeID
 		self.attributes = {}
+		self.expression = expression
 
 	@property
 	def sorted_attributes(self):
@@ -496,7 +499,8 @@ class MPxNodeCPP(object):
 		result = template.format(
 			header_name=self.class_name,
 			class_name=self.class_name,
-			node_name=self.node_name
+			node_name=self.node_name,
+			expression=self.expression
 		)
 
 		return(result)

@@ -3,16 +3,16 @@
 	"author": "kiki",
 	"version": "R100",
 
-	"win_lib_path": "C:/Progra~1/Autodesk/Maya2016/lib",
-	"win_include_path": "C:/aw/maya2016/include",
+	"win_lib_path": "C:/aw/maya2018/lib",
+	"win_include_path": "C:/aw/maya2018/include",
 
-	"mac_lib_path": "/Applications/Autodesk/maya2016/Maya.app/Contents/MacOS",
-	"mac_include_path": "/Applications/Autodesk/maya2016/include",
+	"mac_lib_path": "/Applications/Autodesk/maya2018/Maya.app/Contents/MacOS",
+	"mac_include_path": "/Applications/Autodesk/maya2018/include",
 
-	"lin_lib_path": "/aw/maya2016/lib",
-	"lin_include_path": "/aw/maya2016/include",
+	"lin_lib_path": "/aw/maya2018/lib",
+	"lin_include_path": "/aw/maya2018/include",
 
-	"install_destination": "C:/Users/cwardlaw/Desktop/blackmagick/plug-ins",
+	"install_destination": ".",
 
 	"constants": {
 		"MIN_OUTPUTS": 5,
@@ -23,6 +23,7 @@
 		"MultiplyTwo": {
 			"node_name": "gr_multTwo",
 			"id": "0x123456",
+			"expression": "outValue = input1 * input2",
 			"inputs": {
 				"input1": {
 					"default": 0.0
@@ -40,6 +41,7 @@
 		"MultiplyTwoAngular": {
 			"node_name": "gr_multTwoA",
 			"id": "0x123457",
+			"expression": "outValue = input1 * input2",
 			"inputs": {
 				"input1": {
 					"default": 0.0,

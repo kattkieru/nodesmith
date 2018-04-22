@@ -24,8 +24,6 @@ try:
 except:
 	from imp import reload
 
-print(sys.argv[0])
-
 basepath = os.path.dirname( os.path.abspath(os.path.dirname(sys.argv[0])) )
 #basepath = os.sep.join( [basepath,'..'] )
 
@@ -56,10 +54,12 @@ parser = argparse.ArgumentParser(
 parser.add_argument( 'filename', type=argparse.FileType('r') )
 parser.add_argument( '-folder', metavar='folder', type=str,
 				   help='Output location.', default='.' )
-parser.add_argument( '-force', metavar='True | (False)', type=bool,
+parser.add_argument( '-force', metavar='force', type=bool,
 				   help='Overwrites existing files.', default=False )
-parser.add_argument( '-debug', metavar='True | (False)', type=bool,
+parser.add_argument( '-debug', metavar='debug', type=bool,
 				   help='Enable debugging information.', default=False )
+parser.add_argument( '-cmake', metavar='cmake', type=bool,
+				   help='Create a CMakeListst.txt file with the build.', default=True )
 
 args = parser.parse_args()
 
@@ -108,9 +108,10 @@ for _, node in plugin.nodes.items():
 		fp.write( node.generate_node_main() )
 		all_cpp_files.append( main_name )
 
-with open(os.sep.join([args.folder, 'CMakeLists.txt']), 'w') as fp:
-	print( "\t+ Writing CMake project ..." )
-	fp.write( plugin.generate_plugin_cmake() )
+if args.cmake:
+	with open(os.sep.join([args.folder, 'CMakeLists.txt']), 'w') as fp:
+		print( "\t+ Writing CMake project ..." )
+		fp.write( plugin.generate_plugin_cmake() )
 
 print( "++ Project generation complete." )
 
